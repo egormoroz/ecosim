@@ -130,8 +130,10 @@ impl Industry {
             let Factory { days_closed, money, .. } = self.factories[idx];
 
             if days_closed >= 5 {
+                let inheritance = self.liquidate(idx);
+                population.distribute_inheritance(inheritance);
+
                 n -= 1;
-                self.liquidate(idx);
                 continue;
             }
 
@@ -141,7 +143,6 @@ impl Industry {
 
             idx += 1;
         }
-
     }
 }
 

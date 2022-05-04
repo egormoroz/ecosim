@@ -27,7 +27,7 @@ impl World {
             labour: 0,
         };
 
-        Self  {
+        Self {
             market: MarketNetwork::default(),
             population: Population::new(10, pop),
             industry,

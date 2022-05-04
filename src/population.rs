@@ -86,8 +86,10 @@ impl Population {
             let health = self.pops[idx].health;
 
             if health <= 0 {
+                let inheritance = self.kill(idx);
+                self.distribute_inheritance(inheritance);
+
                 n -= 1;
-                self.kill(idx);
                 continue;
             }
 
@@ -96,6 +98,13 @@ impl Population {
             }
 
             idx += 1;
+        }
+    }
+
+    pub fn distribute_inheritance(&mut self, inheritance: Inheritance) {
+        let heir = self.pops.choose_mut(&mut thread_rng());
+        if let Some(heir) = heir {
+            heir.money += inheritance.0;
         }
     }
 }
