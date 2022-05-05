@@ -1,4 +1,4 @@
-use std::iter::repeat;
+use std::{iter::repeat, fmt};
 
 use rand::prelude::*;
 
@@ -10,7 +10,7 @@ use crate::{
     bns::*,
 };
 
-pub const FACTORY_COST: i32 = 5000;
+pub const FACTORY_COST: i32 = 1000;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Factory {
@@ -58,8 +58,10 @@ pub struct Industry {
 }
 
 impl Industry {
-    pub fn shuffle(&mut self) {
-        self.factories.shuffle(&mut thread_rng());
+    pub fn count_factories(&self, good: Good) -> usize {
+        self.factories.iter()
+            .filter(|f| f.good == good)
+            .count()
     }
 
     pub fn liquidate(&mut self, idx: usize) -> Inheritance {
@@ -144,6 +146,12 @@ impl Industry {
             idx += 1;
         }
     }
+
+    pub fn money_supply(&self) -> i32 {
+        self.factories.iter()
+            .map(|f| f.money)
+            .sum()
+    }
 }
 
 impl Factory {
@@ -178,19 +186,42 @@ impl Factory {
             Good::Food => {
                 self.inventory = self.inventory * 90 / 100;
 
-                let production = 2.0 * f32::ln_1p(labour as f32);
+                let production = 16.0 * f32::ln_1p(labour as f32);
                 self.inventory += production as i32;
             },
             Good::Clothes => {
                 self.inventory = self.inventory * 98 / 100;
 
-                let production = 0.7 * f32::ln_1p(labour as f32);
+                let production = 9.5 * f32::ln_1p(labour as f32);
                 self.inventory += production as i32;
             },
             Good::Labour => panic!("factories cannot produce labour"),
         };
 
         publish_for_sale(market, self.good, self.inventory);
+    }
+}
+
+impl fmt::Display for Industry {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let food_facs = self.factories
+            .iter()
+            .filter(|f| f.good == Good::Food)
+            .count();
+        let cloth_facs = self.factories.len() - food_facs;
+
+        writeln!(f, "{} food factories", food_facs)?;
+        writeln!(f, "{} clothing factories", cloth_facs)?;
+
+        writeln!(f, "{: <10} | {: <10} | {: <10} | {: <10}",
+                 "Good", "Money", "Inventory", "Days closed")?;
+
+        for i in self.factories.iter() {
+            writeln!(f, "{: <10} | {: <10} | {: <10} | {: <10}",
+                     i.good.as_str(), i.money, i.inventory, i.days_closed)?;
+        }
+
+        Ok(())
     }
 }
 

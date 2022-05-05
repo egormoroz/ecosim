@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{fmt, cmp::Ordering};
 
 use crate::good::*;
 
@@ -9,7 +9,13 @@ pub struct MarketNetwork {
 
 impl MarketNetwork {
     pub fn new() -> Self {
-        Default::default()
+        let mut inst = MarketNetwork::default();
+        for m in inst.markets.iter_mut() {
+            //initial price velocity to kick-start the economy
+            m.price_velocity = 10.0;
+        }
+
+        inst
     }
 
     pub fn open(&mut self) {
@@ -76,6 +82,24 @@ impl Market {
 
         self.price_f32 += self.price_velocity;
         self.price = self.price_f32.round() as i32;
+    }
+}
+
+impl fmt::Display for MarketNetwork {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "{: <10} | {: <10 } | {: <10} | {: <10} | {: <10}",
+                 "market", "price", "trend", "demand", "supply")?;
+
+        for (i, m) in self.markets.iter().enumerate() {
+            let good = Good::from_int(i as i32).unwrap();
+            let sign = if m.price_velocity >= 0.0 { '+' } else { '-' };
+            let vel = m.price_velocity.abs();
+
+            writeln!(f, "{: <10} | {: <10} | {}{: <9.2} | {: <10} | {: <10}",
+                    good.as_str(), m.price, sign, vel, m.demand, m.supply)?;
+        }
+
+        Ok(())
     }
 }
 

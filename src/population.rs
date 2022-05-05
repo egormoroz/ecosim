@@ -1,4 +1,5 @@
 use rand::prelude::*;
+use std::fmt;
 
 use crate::{
     good::Good, 
@@ -107,6 +108,16 @@ impl Population {
             heir.money += inheritance.0;
         }
     }
+
+    pub fn count(&self) -> usize {
+        self.pops.len()
+    }
+
+    pub fn money_supply(&self) -> i32 {
+        self.pops.iter()
+            .map(|p| p.money)
+            .sum()
+    }
 }
 
 impl Pop {
@@ -140,6 +151,21 @@ impl Pop {
         } else {
             self.health -= 1;
         }
+    }
+}
+
+impl fmt::Display for Population {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "{} people", self.pops.len())?;
+        writeln!(f, "{: <10} | {: <10 } | {: <10}",
+                 "Money", "Health", "Labour")?;
+
+        for pop in self.pops.iter() {
+            writeln!(f, "{: <10} | {: <10 } | {: <10}", 
+                     pop.money, pop.health, pop.labour)?;
+        }
+
+        Ok(())
     }
 }
 

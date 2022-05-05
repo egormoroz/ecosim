@@ -28,7 +28,7 @@ impl World {
         };
 
         Self {
-            market: MarketNetwork::default(),
+            market: MarketNetwork::new(),
             population: Population::new(10, pop),
             industry,
             day: 0,
@@ -46,6 +46,26 @@ impl World {
 
         self.market.close();
         self.day += 1;
+    }
+
+    pub fn print_summary(&self) {
+        let cloth_factories = self.industry
+            .count_factories(Good::Clothes);
+        let food_factories = self.industry
+            .count_factories(Good::Food);
+        let pops = self.population.count();
+
+        let money_supply = self.industry.money_supply()
+            + self.population.money_supply();
+
+        println!("Day {}", self.day);
+        println!("{}", self.market);
+        // println!("{}", self.population);
+        // println!("{}", self.industry);
+        println!("Population: {}", pops);
+        println!("Food factories: {}", food_factories);
+        println!("Cloth factories: {}", cloth_factories);
+        println!("Money supply: {}", money_supply);
     }
 }
 
